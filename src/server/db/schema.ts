@@ -18,8 +18,8 @@ import {
  */
 export const createTable = mysqlTableCreator((name) => `recipes_${name}`);
 
-export const posts = createTable(
-  "post",
+export const recipes = createTable(
+  "recipe",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     name: varchar("name", { length: 256 }),
@@ -30,5 +30,5 @@ export const posts = createTable(
   },
   (example) => ({
     nameIndex: index("name_idx").on(example.name),
-  })
+  }),
 );
