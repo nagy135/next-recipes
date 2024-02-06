@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   index,
@@ -18,11 +18,15 @@ import {
  */
 export const createTable = mysqlTableCreator((name) => `recipes_${name}`);
 
-export const recipes = createTable(
+export const recipe = createTable(
   "recipe",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    userId: varchar("user_id", { length: 256 }).notNull(),
+
     name: varchar("name", { length: 256 }),
+    imagePath: varchar("name", { length: 256 }),
+
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -32,3 +36,69 @@ export const recipes = createTable(
     nameIndex: index("name_idx").on(example.name),
   }),
 );
+
+export const recipeRelations = relations(recipe, ({ many }) => ({
+  ingredients: many(ingredient),
+}));
+
+export type SelectRecipe = typeof recipe.$inferSelect;
+export type InsertRecipe = typeof recipe.$inferInsert;
+
+export const ingredient = createTable(
+  "ingredient",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    recipeId: bigint("recipe_id", { mode: "number" }).notNull(),
+
+    name: varchar("name", { length: 256 }),
+
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (example) => ({
+    nameIndex: index("name_idx").on(example.name),
+  }),
+);
+
+export const ingredientRelations = relations(ingredient, ({ one }) => ({
+  recipe: one(recipe, {
+    fields: [ingredient.recipeId],
+    references: [recipe.id],
+  }),
+}));
+
+export type SelectIngredient = typeof ingredient.$inferSelect;
+export type InsertIngredient = typeof ingredient.$inferInsert;
+
+export const usage = createTable(
+  "usage",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    recipeId: bigint("recipe_id", { mode: "number" }).notNull(),
+    ingredientId: bigint("ingredient_id", { mode: "number" }).notNull(),
+
+    name: varchar("name", { length: 256 }),
+    amount: varchar("amount", { length: 256 }),
+
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (example) => ({
+    nameIndex: index("name_idx").on(example.name),
+  }),
+);
+
+export const usageRelations = relations(usage, ({ one }) => ({
+  recipe: one(recipe, {
+    fields: [usage.recipeId],
+    references: [recipe.id],
+  }),
+  ingredient: one(ingredient, {
+    fields: [usage.ingredientId],
+    references: [ingredient.id],
+  }),
+}));

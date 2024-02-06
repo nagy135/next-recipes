@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { recipes } from "~/server/db/schema";
+import { recipe } from "~/server/db/schema";
 
 export const recipeRouter = createTRPCRouter({
   hello: publicProcedure
@@ -16,14 +16,16 @@ export const recipeRouter = createTRPCRouter({
     .input(z.object({ name: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       // simulate a slow db call
-      await ctx.db.insert(recipes).values({
+      await ctx.db.insert(recipe).values({
         name: input.name,
+        userId: "abc",
+        imagePath: "",
       });
     }),
 
   getLatest: publicProcedure.query(({ ctx }) => {
-    return ctx.db.query.recipes.findFirst({
-      orderBy: (recipes, { desc }) => [desc(recipes.createdAt)],
+    return ctx.db.query.recipe.findFirst({
+      orderBy: (recipe, { desc }) => [desc(recipe.createdAt)],
     });
   }),
 });
