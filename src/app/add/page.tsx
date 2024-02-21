@@ -1,3 +1,9 @@
+import { AddRecipe } from "../_components/add-recipe";
+
 export default () => {
-  return "haha";
+  return (
+    <div className="mb-8 flex min-h-screen flex-col items-center">
+      <AddRecipe />
+    </div>
+  );
 };
