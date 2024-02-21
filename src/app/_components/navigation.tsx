@@ -29,6 +29,7 @@ const homeIcon = (
 const pages = {
   "/": homeIcon,
   "/add": "Add",
+  "/search": "Search",
 } as const;
 
 export default () => {
