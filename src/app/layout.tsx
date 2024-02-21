@@ -8,6 +8,7 @@ import { Toaster } from "~/app/_components/ui/toaster";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { ClerkProvider, SignedIn, UserButton } from "@clerk/nextjs";
+import Navigation from "./_components/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default function RootLayout({
                   </div>
                 </div>
               </SignedIn>
+              <Navigation />
               {children}
               <Toaster />
             </ThemeProvider>
