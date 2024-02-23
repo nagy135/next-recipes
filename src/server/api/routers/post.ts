@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { recipe } from "~/server/db/schema";
+import { ingredient, recipe, usage } from "~/server/db/schema";
 
 export const recipeRouter = createTRPCRouter({
   hello: publicProcedure
@@ -13,13 +13,31 @@ export const recipeRouter = createTRPCRouter({
     }),
 
   create: publicProcedure
-    .input(z.object({ name: z.string().min(1) }))
+    .input(
+      z.object({
+        name: z.string().min(1),
+        userId: z.string(),
+        ingredients: z
+          .object({ name: z.string().min(1), amount: z.string().min(1) })
+          .array(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      // simulate a slow db call
-      await ctx.db.insert(recipe).values({
+      const recipeEntity = await ctx.db.insert(recipe).values({
         name: input.name,
-        userId: "abc",
+        userId: input.userId,
         imagePath: "",
+      });
+      input.ingredients.map(async (e) => {
+        const ingredientEntity = await ctx.db.insert(ingredient).values({
+          name: e.name,
+        });
+
+        await ctx.db.insert(usage).values({
+          recipeId: parseInt(recipeEntity.insertId),
+          amount: e.amount,
+          ingredientId: parseInt(ingredientEntity.insertId),
+        });
       });
     }),
 

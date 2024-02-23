@@ -25,7 +25,7 @@ export default () => {
     <NavigationMenu className="p-2">
       <NavigationMenuList>
         {Object.entries(pages).map(([k, v]) => (
-          <NavigationMenuItem>
+          <NavigationMenuItem key={`menu-item-${k}`}>
             <Link href={k} legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                 {v.icon ? <span className="pr-3">{v.icon}</span> : null}{" "}

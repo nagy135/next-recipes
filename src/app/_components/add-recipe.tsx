@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@clerk/nextjs";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import {
@@ -28,14 +28,10 @@ const FormSchema = z.object({
     .min(1, { message: "You must enter a name" })
     .max(256, { message: "Name too long" })
     .describe("Name"),
-
-  translation: z
-    .string({
-      required_error: "Please write a translation",
-    })
-    .min(1, { message: "You must enter translation" })
-    .max(256, { message: "Translation too long" })
-    .describe("Translation"),
+  ingredients: z
+    .object({ name: z.string().min(1), amount: z.string().min(1) })
+    .array()
+    .describe("Ingredients"),
 });
 
 export function AddRecipe() {
@@ -47,8 +43,13 @@ export function AddRecipe() {
     mode: "onChange",
     defaultValues: {
       name: "",
-      translation: "",
+      ingredients: [],
     },
+  });
+
+  const { fields, append } = useFieldArray({
+    control: form.control, // control props comes from useForm (optional: if you are using FormContext)
+    name: "ingredients", // unique name for your Field Array
   });
 
   const createWord = api.recipe.create.useMutation({
@@ -58,7 +59,7 @@ export function AddRecipe() {
     onError: (error) => {
       const matches = error.message;
       toast({
-        title: "Too close to already existing word pair",
+        title: "Error",
         description: matches,
         variant: "destructive",
       });
@@ -76,8 +77,8 @@ export function AddRecipe() {
     }
     const newValues = {
       name: data.name,
-      translation: data.translation,
       userId: user.id,
+      ingredients: data.ingredients,
     };
     createWord.mutate(newValues);
   }
@@ -99,20 +100,25 @@ export function AddRecipe() {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="translation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Translation</FormLabel>
-              <FormControl>
-                <Input placeholder="My translation" {...field} />
-              </FormControl>
-              <FormDescription>Name of the translation</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <Button
+          type="button"
+          className="block"
+          onClick={() => append({ name: "", amount: "" })}
+        >
+          +
+        </Button>
+        {fields.map((field, index) => (
+          <div className="flex gap-2" key={`${field.id}-field`}>
+            <input
+              key={field.id} // important to include key with field's id
+              {...form.register(`ingredients.${index}.name`)}
+            />
+            <input
+              key={field.id + "-2"} // important to include key with field's id
+              {...form.register(`ingredients.${index}.amount`)}
+            />
+          </div>
+        ))}
         <Button type="submit">Create</Button>
       </form>
     </Form>
