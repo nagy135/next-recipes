@@ -16,8 +16,8 @@ const pages: Record<string, { name?: string; icon?: JSX.Element }> = {
   "/": {
     icon: homeIcon,
   },
-  "/add": { name: "Add", icon: plusIcon },
-  "/find": { name: "Find", icon: magnifyingGlassIcon },
+  "/add": { icon: plusIcon },
+  "/find": { icon: magnifyingGlassIcon },
 } as const;
 
 export default () => {
@@ -28,8 +28,10 @@ export default () => {
           <NavigationMenuItem key={`menu-item-${k}`}>
             <Link href={k} legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                {v.icon ? <span className="pr-3">{v.icon}</span> : null}{" "}
-                {v.name ?? ""}
+                <div className="flex items-center">
+                  {v.icon ? <div>{v.icon}</div> : null}
+                  {v.name ?? <div>{v.name}</div>}
+                </div>
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>

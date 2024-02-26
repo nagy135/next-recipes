@@ -19,6 +19,7 @@ import { api } from "~/trpc/react";
 import { useToast } from "../_components/ui/use-toast";
 import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
+import plusIcon from "~/assets/icons/plus";
 
 const FormSchema = z.object({
   name: z
@@ -102,10 +103,10 @@ export function AddRecipe() {
         />
         <Button
           type="button"
-          className="block"
+          className="flex"
           onClick={() => append({ name: "", amount: "" })}
         >
-          +
+          {plusIcon} ingredient
         </Button>
         {fields.map((field, index) => (
           <div className="flex gap-2" key={`${field.id}-field`}>
