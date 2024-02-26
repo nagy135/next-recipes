@@ -28,17 +28,19 @@ export const recipeRouter = createTRPCRouter({
         userId: input.userId,
         imagePath: "",
       });
-      input.ingredients.map(async (e) => {
-        const ingredientEntity = await ctx.db.insert(ingredient).values({
-          name: e.name,
-        });
+      await Promise.all(
+        input.ingredients.map(async (e) => {
+          const ingredientEntity = await ctx.db.insert(ingredient).values({
+            name: e.name,
+          });
 
-        await ctx.db.insert(usage).values({
-          recipeId: parseInt(recipeEntity.insertId),
-          amount: e.amount,
-          ingredientId: parseInt(ingredientEntity.insertId),
-        });
-      });
+          await ctx.db.insert(usage).values({
+            recipeId: parseInt(recipeEntity.insertId),
+            amount: e.amount,
+            ingredientId: parseInt(ingredientEntity.insertId),
+          });
+        }),
+      );
     }),
 
   getLatest: publicProcedure.query(({ ctx }) => {

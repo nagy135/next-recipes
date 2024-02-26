@@ -29,7 +29,7 @@ export default () => {
             <Link href={k} legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                 <div className="flex items-center">
-                  {v.icon ? <div>{v.icon}</div> : null}
+                  {v.icon ?? <div>{v.icon}</div>}
                   {v.name ?? <div>{v.name}</div>}
                 </div>
               </NavigationMenuLink>

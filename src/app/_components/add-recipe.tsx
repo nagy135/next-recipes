@@ -20,6 +20,7 @@ import { useToast } from "../_components/ui/use-toast";
 import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
 import plusIcon from "~/assets/icons/plus";
+import { Separator } from "~/components/ui/separator";
 
 const FormSchema = z.object({
   name: z
@@ -55,6 +56,10 @@ export function AddRecipe() {
 
   const createWord = api.recipe.create.useMutation({
     onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Recipe created",
+      });
       form.reset();
     },
     onError: (error) => {
@@ -101,25 +106,43 @@ export function AddRecipe() {
             </FormItem>
           )}
         />
+        {fields.map((field, index) => (
+          <div className="flex-col gap-2" key={`${field.id}-field`}>
+            <Separator className="mb-2" />
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Onions"
+                  {...field}
+                  {...form.register(`ingredients.${index}.name`)}
+                />
+              </FormControl>
+              <FormDescription>Name of the ingredient</FormDescription>
+              <FormMessage />
+            </FormItem>
+            <FormItem>
+              <FormLabel>Amount</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="200g"
+                  {...field}
+                  {...form.register(`ingredients.${index}.amount`)}
+                />
+              </FormControl>
+              <FormDescription>Amount of ingredient</FormDescription>
+              <FormMessage />
+            </FormItem>
+            <Separator className="mt-2" />
+          </div>
+        ))}
         <Button
           type="button"
           className="flex"
           onClick={() => append({ name: "", amount: "" })}
         >
-          {plusIcon} ingredient
+          <span className="flex pr-2">{plusIcon}</span> ingredient
         </Button>
-        {fields.map((field, index) => (
-          <div className="flex gap-2" key={`${field.id}-field`}>
-            <input
-              key={field.id} // important to include key with field's id
-              {...form.register(`ingredients.${index}.name`)}
-            />
-            <input
-              key={field.id + "-2"} // important to include key with field's id
-              {...form.register(`ingredients.${index}.amount`)}
-            />
-          </div>
-        ))}
         <Button type="submit">Create</Button>
       </form>
     </Form>
