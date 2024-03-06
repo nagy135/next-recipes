@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { groupBy } from "~/helpers/group-by";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { ingredient, recipe, usage } from "~/server/db/schema";
@@ -43,9 +44,22 @@ export const recipeRouter = createTRPCRouter({
       );
     }),
 
-  getLatest: publicProcedure.query(({ ctx }) => {
-    return ctx.db.query.recipe.findFirst({
+  getAll: publicProcedure.query(({ ctx }) => {
+    return ctx.db.query.recipe.findMany({
       orderBy: (recipe, { desc }) => [desc(recipe.createdAt)],
     });
+  }),
+  getAllWithIngredients: publicProcedure.query(async ({ ctx }) => {
+    const usages = await ctx.db.query.usage.findMany({
+      with: {
+        recipe: true,
+        ingredient: true,
+      },
+      orderBy: (recipe, { desc }) => [desc(recipe.createdAt)],
+    });
+    return groupBy(usages, "recipeId").map((e) => ({
+      recipe: e[0]?.recipe,
+      ingredients: e.map((e2) => ({ ...e2.ingredient, amount: e2.amount })),
+    }));
   }),
 });
