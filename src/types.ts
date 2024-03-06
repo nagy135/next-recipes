@@ -1,4 +1,4 @@
-import { SelectIngredient, SelectRecipe } from "./server/db/schema";
+import { type SelectIngredient, type SelectRecipe } from "./server/db/schema";
 
 export type RecipeWithIngredients = {
   recipe?: SelectRecipe;

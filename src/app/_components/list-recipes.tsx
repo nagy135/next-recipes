@@ -1,5 +1,5 @@
 import { Separator } from "~/components/ui/separator";
-import { RecipeWithIngredients } from "~/types";
+import { type RecipeWithIngredients } from "~/types";
 
 type ListRecipesProps = {
   records: RecipeWithIngredients[];
