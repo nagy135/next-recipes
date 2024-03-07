@@ -4,6 +4,7 @@ import Link from "next/link";
 import homeIcon from "~/assets/icons/home";
 import magnifyingGlassIcon from "~/assets/icons/magnifying-glass";
 import plusIcon from "~/assets/icons/plus";
+import questionMark from "~/assets/icons/question-mark";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -18,6 +19,7 @@ const pages: Record<string, { name?: string; icon?: JSX.Element }> = {
   },
   "/add": { icon: plusIcon },
   "/find": { icon: magnifyingGlassIcon },
+  "/about": { icon: questionMark },
 } as const;
 
 export default () => {
