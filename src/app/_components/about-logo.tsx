@@ -30,7 +30,7 @@ const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 150;
 const spacingX = CANVAS_WIDTH / width;
 const spacingY = CANVAS_HEIGHT / height;
-const RADIUS = 6;
+const RADIUS = 2;
 const GLOBAL_MARGIN = 100;
 const UPDATE_TICK = 2; // ms
 const RENDERING_WIDTH = CANVAS_WIDTH + GLOBAL_MARGIN * 2;
@@ -49,9 +49,9 @@ const mouseMove = (e: MouseEvent, canvasRect: [number, number]) => {
     if (isInRadius(point.x, point.y, x, y, MOUSE_RADIUS)) {
 
       const distanceX = point.x - x;
-      const pushX = (1 - (RADIUS - distanceX) / RADIUS) * 2;
+      const pushX = (1 - (RADIUS - distanceX) / RADIUS);
       const distanceY = point.y - y;
-      const pushY = (1 - (RADIUS - distanceY) / RADIUS) * 2;
+      const pushY = (1 - (RADIUS - distanceY) / RADIUS);
 
       point.dx += pushX;
       point.dy += pushY;
@@ -81,13 +81,21 @@ class Point {
 }
 
 const points = new Array<Point>();
+const density = 4;
 
 for (let iY = 0; iY < height; iY++) {
   for (let iX = 0; iX < width; iX++) {
     if (letters[iY]?.[iX]) {
       const x = iX * spacingX + GLOBAL_MARGIN;
       const y = iY * spacingY + GLOBAL_MARGIN;
-      points.push(new Point(x, y));
+
+      for (let i = 0; i < density; i++) {
+        for (let j = 0; j < density; j++) {
+          points.push(new Point(x + i * (spacingX / density), y + j * (spacingY / density)));
+        }
+      }
+
+      // points.push(new Point(x + halfSpacingX, y + halfSpacingY));
     }
   }
 }
