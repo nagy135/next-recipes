@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import homeIcon from "~/assets/icons/home";
 import magnifyingGlassIcon from "~/assets/icons/magnifying-glass";
 import plusIcon from "~/assets/icons/plus";
@@ -23,19 +24,22 @@ const pages: Record<string, { name?: string; icon?: JSX.Element }> = {
 } as const;
 
 export default () => {
+  const pathname = usePathname();
   return (
     <NavigationMenu className="p-2">
       <NavigationMenuList>
         {Object.entries(pages).map(([k, v]) => (
           <NavigationMenuItem key={`menu-item-${k}`}>
-            <Link href={k} legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                <div className="flex items-center">
-                  {v.icon ?? <div>{v.icon}</div>}
-                  {v.name ?? <div>{v.name}</div>}
-                </div>
-              </NavigationMenuLink>
-            </Link>
+            <div className={pathname === k ? "border-white border-2 rounded" : ""}>
+              <Link href={k} legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <div className="flex items-center">
+                    {v.icon ?? <div>{v.icon}</div>}
+                    {v.name ?? <div>{v.name}</div>}
+                  </div>
+                </NavigationMenuLink>
+              </Link>
+            </div>
           </NavigationMenuItem>
         ))}
       </NavigationMenuList>
