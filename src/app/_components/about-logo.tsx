@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, MouseEvent } from "react";
+import { useCallback, useEffect, useRef, type MouseEvent } from "react";
 
 // const letters = [
 //   [1, 0],
