@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@clerk/nextjs";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 import {
   Form,
@@ -40,6 +41,8 @@ const FormSchema = z.object({
 export function AddRecipe() {
   const { user } = useUser();
   const { toast } = useToast();
+
+  const [animationParent] = useAutoAnimate({ duration: 300, disrespectUserMotionPreference: true });
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -96,12 +99,12 @@ export function AddRecipe() {
   }
 
   useEffect(() => {
-    window.scrollTo(0, document.body.scrollHeight);
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 300);
   }, [fields])
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6`}>
+      <form ref={animationParent} onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6`}>
         <FormField
           control={form.control}
           name="name"
