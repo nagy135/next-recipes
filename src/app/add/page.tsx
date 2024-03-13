@@ -4,7 +4,7 @@ import { ParticleLogo } from "../_components/particle-logo";
 export default () => {
   return (
     <div className="mb-8 flex min-h-screen flex-col items-center">
-      <ParticleLogo title="Add" />
+      <ParticleLogo title="New Recipe" />
       <AddRecipe />
     </div>
   );

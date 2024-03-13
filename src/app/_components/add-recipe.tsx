@@ -21,6 +21,7 @@ import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
 import plusIcon from "~/assets/icons/plus";
 import { Separator } from "~/components/ui/separator";
+import { useCallback, useEffect } from "react";
 
 const FormSchema = z.object({
   name: z
@@ -49,10 +50,15 @@ export function AddRecipe() {
     },
   });
 
+
   const { fields, append } = useFieldArray({
     control: form.control, // control props comes from useForm (optional: if you are using FormContext)
     name: "ingredients", // unique name for your Field Array
   });
+
+  const addNewIngredient = useCallback(() => {
+    append({ name: "", amount: "" })
+  }, []);
 
   const createWord = api.recipe.create.useMutation({
     onSuccess: () => {
@@ -89,6 +95,10 @@ export function AddRecipe() {
     createWord.mutate(newValues);
   }
 
+  useEffect(() => {
+    window.scrollTo(0, document.body.scrollHeight);
+  }, [fields])
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6`}>
@@ -99,15 +109,15 @@ export function AddRecipe() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="My word" {...field} />
+                <Input placeholder="New recipe" {...field} />
               </FormControl>
-              <FormDescription>Name of the word</FormDescription>
+              <FormDescription>Name of the food you are adding</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         {fields.map((field, index) => (
-          <div className="flex-col gap-2" key={`${field.id}-field`}>
+          <div className="flex-col border p-5 border-white rounded gap-2" key={`${field.id}-field`}>
             <Separator className="mb-2" />
             <FormItem>
               <FormLabel>Name</FormLabel>
@@ -136,14 +146,16 @@ export function AddRecipe() {
             <Separator className="mt-2" />
           </div>
         ))}
-        <Button
-          type="button"
-          className="flex"
-          onClick={() => append({ name: "", amount: "" })}
-        >
-          <span className="flex pr-2">{plusIcon}</span> ingredient
-        </Button>
-        <Button type="submit">Create</Button>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            className="flex"
+            onClick={() => addNewIngredient()}
+          >
+            <span className="flex pr-2">{plusIcon}</span> ingredient
+          </Button>
+          <Button type="submit">Create</Button>
+        </div>
       </form>
     </Form>
   );
