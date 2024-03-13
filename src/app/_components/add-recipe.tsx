@@ -51,7 +51,7 @@ export function AddRecipe() {
   });
 
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control, // control props comes from useForm (optional: if you are using FormContext)
     name: "ingredients", // unique name for your Field Array
   });
@@ -118,7 +118,11 @@ export function AddRecipe() {
         />
         {fields.map((field, index) => (
           <div className="flex-col border p-5 border-white rounded gap-2" key={`${field.id}-field`}>
-            <Separator className="mb-2" />
+            <div className="w-full flex justify-end">
+              <Button
+                onClick={() => remove(index)}
+                className="" variant="destructive">X</Button>
+            </div>
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
