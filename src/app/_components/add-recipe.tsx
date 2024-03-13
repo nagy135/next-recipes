@@ -22,7 +22,9 @@ import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
 import plusIcon from "~/assets/icons/plus";
 import { Separator } from "~/components/ui/separator";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
+
+const ANIMATION_DELAY = 300;
 
 const FormSchema = z.object({
   name: z
@@ -42,7 +44,7 @@ export function AddRecipe() {
   const { user } = useUser();
   const { toast } = useToast();
 
-  const [animationParent] = useAutoAnimate({ duration: 300, disrespectUserMotionPreference: true });
+  const [animationParent] = useAutoAnimate({ easing: "ease-in", duration: ANIMATION_DELAY, disrespectUserMotionPreference: true });
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -61,6 +63,7 @@ export function AddRecipe() {
 
   const addNewIngredient = useCallback(() => {
     append({ name: "", amount: "" })
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), ANIMATION_DELAY);
   }, []);
 
   const createWord = api.recipe.create.useMutation({
@@ -98,10 +101,6 @@ export function AddRecipe() {
     createWord.mutate(newValues);
   }
 
-  useEffect(() => {
-    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 300);
-  }, [fields])
-
   return (
     <Form {...form}>
       <form ref={animationParent} onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6`}>
@@ -124,6 +123,7 @@ export function AddRecipe() {
             <div className="w-full flex justify-end">
               <Button
                 onClick={() => remove(index)}
+                type="button"
                 className="" variant="destructive">X</Button>
             </div>
             <FormItem>
