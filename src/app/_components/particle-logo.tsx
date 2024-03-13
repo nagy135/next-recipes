@@ -7,9 +7,11 @@ type ParticleLogoProps = {
 }
 
 export function ParticleLogo({ title }: ParticleLogoProps) {
+
+
   return (
-    <div className="h-[20rem] w-full bg-[#020817] flex flex-col items-center justify-center overflow-hidden rounded-md">
-      <h1 className="md:text-7xl text-3xl lg:text-9xl font-bold text-center text-white relative z-20">
+    <div className="h-[20rem] w-full bg-gray-200 flex flex-col items-center justify-center overflow-hidden rounded-md mb-5">
+      <h1 className="md:text-7xl text-3xl lg:text-9xl font-bold text-center text-[#0b0b0b] relative z-20">
         {title}
       </h1>
       <div className="w-[40rem] h-40 relative">
@@ -24,14 +26,14 @@ export function ParticleLogo({ title }: ParticleLogoProps) {
           background="transparent"
           minSize={0.4}
           maxSize={1}
-          particleDensity={1200}
+          particleDensity={1900}
           className="w-full h-full"
-          particleColor="#FFFFFF"
+          particleColor="#0b0b0b"
         />
 
         {/* Radial Gradient to prevent sharp edges */}
-        <div className="absolute inset-0 w-full h-full bg-[#020817] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]"></div>
+        <div className="absolute inset-0 w-full h-full bg-gray-200 [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]"></div>
       </div>
-    </div>
+    </div >
   );
 }

@@ -119,7 +119,8 @@ export function AddRecipe() {
           )}
         />
         {fields.map((field, index) => (
-          <div className="flex-col border p-5 border-white rounded gap-2" key={`${field.id}-field`}>
+          <div
+            className="flex-col border p-5 border-white rounded gap-2" key={`${field.id}-field`}>
             <div className="w-full flex justify-end">
               <Button
                 onClick={() => remove(index)}

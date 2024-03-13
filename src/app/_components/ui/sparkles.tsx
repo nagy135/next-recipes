@@ -42,7 +42,6 @@ export const SparklesCore = (props: ParticlesProps) => {
 
   const particlesLoaded = async (container?: Container) => {
     if (container) {
-      console.log(container);
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       controls.start({
         opacity: 1,
