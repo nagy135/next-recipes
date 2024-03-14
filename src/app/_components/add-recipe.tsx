@@ -27,6 +27,7 @@ import { Button } from "../_components/ui/button";
 import plusIcon from "~/assets/icons/plus";
 import { Separator } from "~/components/ui/separator";
 import { ChangeEvent, useCallback, useRef, useState } from "react";
+import { Textarea } from "~/components/ui/textarea";
 
 const ANIMATION_DELAY = 300;
 
@@ -97,6 +98,9 @@ const FormSchema = z.object({
     .min(1, { message: "You must enter a name" })
     .max(256, { message: "Name too long" })
     .describe("Name"),
+  description: z
+    .string()
+    .describe("Description"),
   image: z
     .object({})
     .describe("Image thumbnail"),
@@ -160,26 +164,6 @@ export function AddRecipe() {
     },
   });
 
-  async function uploadThumbnail() {
-    if (!imageRef.current) return;
-    const thumbnail = imageRef.current.files![0];
-    let url: string | undefined = undefined;
-    if (thumbnail) {
-      toast({
-        title: "Uploading file",
-        description: "Please wait ...",
-      });
-      const formData = new FormData();
-      formData.append('file', thumbnail);
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'PUT',
-        body: formData,
-      });
-      const blobResult = await uploadResponse.json() as PutBlobResult;
-      url = blobResult.url;
-    };
-  }
-
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     if (!data.ingredients.length) {
       toast({
@@ -227,6 +211,7 @@ export function AddRecipe() {
       userId: user.id,
       imagePath: uploadedUrl,
       ingredients: data.ingredients,
+      description: data.description,
     });
   }
 
@@ -243,6 +228,20 @@ export function AddRecipe() {
                 <Input placeholder="New recipe" {...field} />
               </FormControl>
               <FormDescription>Name of the food you are adding</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea placeholder="My favorite recipe" {...field} />
+              </FormControl>
+              <FormDescription>Description of a recipe</FormDescription>
               <FormMessage />
             </FormItem>
           )}

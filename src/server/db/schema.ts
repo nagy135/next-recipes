@@ -25,7 +25,7 @@ export const recipe = createTable(
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     userId: varchar("user_id", { length: 256 }).notNull(),
 
-    name: varchar("name", { length: 256 }),
+    name: varchar("name", { length: 256 }).notNull(),
     description: text("description"),
     imagePath: varchar("image_path", { length: 256 }),
 

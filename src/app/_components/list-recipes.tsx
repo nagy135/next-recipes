@@ -5,13 +5,22 @@ type ListRecipesProps = {
   records: RecipeWithIngredients[];
 };
 
-const Body = ({ title, author, description }: { title: string, author: string, description: string }) => {
+const Body = ({ title, author, description, ingredients }:
+  {
+    title: string,
+    author: string,
+    description: string,
+    ingredients: { name: string | null, amount: string | null }[]
+  }) => {
   return (
     <div>
       <p className="font-bold text-4xl text-white">{title}</p>
       <p className="font-normal text-base text-white">{author}</p>
       <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
-        {description}
+        {description.substring(0, 200)}...
+      </p>
+      <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
+        {ingredients.map(e => <p>{e.name} - {e.amount}</p>)}
       </p>
     </div>
   );
@@ -24,6 +33,7 @@ export function ListRecipes({ records }: ListRecipesProps) {
       content: <Body
         title={e.recipe?.name ?? ""}
         author={e.recipe?.userId ?? ""}
+        ingredients={e.ingredients.map(e => ({ name: e.name, amount: e.amount })) ?? []}
         description={e.recipe?.description ?? ""} />,
       className: "col-span-1",
       thumbnail: e.recipe?.imagePath ?? '',
