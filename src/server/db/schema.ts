@@ -8,7 +8,8 @@ import {
   mysqlTableCreator,
   timestamp,
   varchar,
-  text
+  text,
+  primaryKey
 } from "drizzle-orm/mysql-core";
 
 /**
@@ -39,6 +40,10 @@ export const recipe = createTable(
   }),
 );
 
+export const recipeRelations = relations(recipe, ({ many }) => ({
+  usage: many(usage),
+}));
+
 export type SelectRecipe = typeof recipe.$inferSelect;
 export type InsertRecipe = typeof recipe.$inferInsert;
 
@@ -59,6 +64,10 @@ export const ingredient = createTable(
   }),
 );
 
+export const ingredientRelations = relations(recipe, ({ many }) => ({
+  usage: many(usage),
+}));
+
 export type SelectIngredient = typeof ingredient.$inferSelect;
 export type InsertIngredient = typeof ingredient.$inferInsert;
 
@@ -73,7 +82,10 @@ export const usage = createTable("usage", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
+}, (t) => ({
+  pk: primaryKey(t.recipeId, t.ingredientId),
+}),
+);
 
 export const usageRelations = relations(usage, ({ one }) => ({
   recipe: one(recipe, {

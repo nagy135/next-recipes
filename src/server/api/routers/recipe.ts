@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { groupBy } from "~/helpers/group-by";
 
@@ -5,14 +6,6 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { ingredient, recipe, usage } from "~/server/db/schema";
 
 export const recipeRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-
   create: publicProcedure
     .input(
       z.object({
@@ -45,6 +38,20 @@ export const recipeRouter = createTRPCRouter({
           });
         }),
       );
+    }),
+  getOneWithIngredients: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.query.recipe.findFirst({
+        where: (recipe, { eq }) => (eq(recipe.id, input.id)),
+        with: {
+          usage: {
+            with: {
+              ingredient: true
+            }
+          }
+        }
+      })
     }),
 
   getAll: publicProcedure.query(({ ctx }) => {
