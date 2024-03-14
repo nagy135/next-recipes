@@ -8,6 +8,7 @@ import {
   mysqlTableCreator,
   timestamp,
   varchar,
+  text
 } from "drizzle-orm/mysql-core";
 
 /**
@@ -25,6 +26,7 @@ export const recipe = createTable(
     userId: varchar("user_id", { length: 256 }).notNull(),
 
     name: varchar("name", { length: 256 }),
+    description: text("description"),
     imagePath: varchar("image_path", { length: 256 }),
 
     createdAt: timestamp("created_at")
