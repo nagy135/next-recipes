@@ -18,6 +18,7 @@ export const recipeRouter = createTRPCRouter({
       z.object({
         name: z.string().min(1),
         userId: z.string(),
+        imagePath: z.string().optional(),
         ingredients: z
           .object({ name: z.string().min(1), amount: z.string().min(1) })
           .array(),
@@ -27,7 +28,7 @@ export const recipeRouter = createTRPCRouter({
       const recipeEntity = await ctx.db.insert(recipe).values({
         name: input.name,
         userId: input.userId,
-        imagePath: "",
+        imagePath: input.imagePath ?? "",
       });
       await Promise.all(
         input.ingredients.map(async (e) => {

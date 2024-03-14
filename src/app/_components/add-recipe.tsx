@@ -22,9 +22,25 @@ import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
 import plusIcon from "~/assets/icons/plus";
 import { Separator } from "~/components/ui/separator";
-import { useCallback } from "react";
+import { ChangeEvent, useCallback, useRef, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 const ANIMATION_DELAY = 300;
+
+function getImageData(event: ChangeEvent<HTMLInputElement>) {
+  // FileList is immutable, so we need to create a new one
+  const dataTransfer = new DataTransfer();
+
+  // Add newly uploaded images
+  Array.from(event.target.files!).forEach((image) =>
+    dataTransfer.items.add(image)
+  );
+
+  const files = dataTransfer.files;
+  const displayUrl = URL.createObjectURL(event.target.files![0] ?? new Blob());
+
+  return { files, displayUrl };
+}
 
 const FormSchema = z.object({
   name: z
@@ -34,6 +50,9 @@ const FormSchema = z.object({
     .min(1, { message: "You must enter a name" })
     .max(256, { message: "Name too long" })
     .describe("Name"),
+  image: z
+    .object({})
+    .describe("Image thumbnail"),
   ingredients: z
     .object({ name: z.string().min(1), amount: z.string().min(1) })
     .array()
@@ -43,6 +62,9 @@ const FormSchema = z.object({
 export function AddRecipe() {
   const { user } = useUser();
   const { toast } = useToast();
+  const imageRef = useRef<HTMLInputElement>(null);
+
+  const [preview, setPreview] = useState("");
 
   const [animationParent] = useAutoAnimate({ easing: "ease-in", duration: ANIMATION_DELAY, disrespectUserMotionPreference: true });
 
@@ -51,6 +73,7 @@ export function AddRecipe() {
     mode: "onChange",
     defaultValues: {
       name: "",
+      image: { path: "" },
       ingredients: [],
     },
   });
@@ -84,7 +107,21 @@ export function AddRecipe() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: any) {
+    if (!imageRef.current) return;
+    const thumbnail = imageRef.current.files![0];
+    if (!thumbnail) return;
+
+    const formData = new FormData();
+    formData.append('file', thumbnail);
+
+    const uploadResponse = await fetch('http://localhost:3000/api/upload', {
+      method: 'PUT',
+      body: formData,
+    });
+
+    const { url } = await uploadResponse.json() as { url: string };
+
     if (!user?.id) {
       alert("Not logged in ...somehow");
       return;
@@ -93,12 +130,13 @@ export function AddRecipe() {
       alert("You need to have an email address set to create a word!");
       return;
     }
-    const newValues = {
+
+    createWord.mutate({
       name: data.name,
       userId: user.id,
+      imagePath: url ?? undefined,
       ingredients: data.ingredients,
-    };
-    createWord.mutate(newValues);
+    });
   }
 
   return (
@@ -116,6 +154,37 @@ export function AddRecipe() {
               <FormDescription>Name of the food you are adding</FormDescription>
               <FormMessage />
             </FormItem>
+          )}
+        />
+        <Avatar className="w-24 h-24">
+          <AvatarImage src={preview} />
+          <AvatarFallback>BU</AvatarFallback>
+        </Avatar>
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field: { onChange, value, ...rest } }) => (
+            <>
+              <FormItem>
+                <FormLabel>Image</FormLabel>
+                <FormControl>
+                  <Input
+                    type="file"
+                    {...rest}
+                    ref={imageRef}
+                    onChange={(event) => {
+                      const { files, displayUrl } = getImageData(event)
+                      setPreview(displayUrl);
+                      onChange(files);
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Choose image as a thumbnail of a recipe
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            </>
           )}
         />
         {fields.map((field, index) => (
