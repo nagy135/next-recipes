@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { PutBlobResult } from '@vercel/blob'
 
 import {
   Form,
@@ -96,6 +97,10 @@ export function AddRecipe() {
         description: "Recipe created",
       });
       form.reset();
+
+      // reset file input
+      if (imageRef.current) imageRef.current.value = "";
+      setPreview("")
     },
     onError: (error) => {
       const matches = error.message;
@@ -107,20 +112,32 @@ export function AddRecipe() {
     },
   });
 
-  async function onSubmit(data: any) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (!data.ingredients.length) {
+      toast({
+        title: "Error",
+        description: "Recipe needs at least one ingredient",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!imageRef.current) return;
     const thumbnail = imageRef.current.files![0];
-    if (!thumbnail) return;
-
-    const formData = new FormData();
-    formData.append('file', thumbnail);
-
-    const uploadResponse = await fetch('http://localhost:3000/api/upload', {
-      method: 'PUT',
-      body: formData,
-    });
-
-    const { url } = await uploadResponse.json() as { url: string };
+    let url: string | undefined = undefined;
+    if (thumbnail) {
+      toast({
+        title: "Uploading file",
+        description: "Please wait ...",
+      });
+      const formData = new FormData();
+      formData.append('file', thumbnail);
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'PUT',
+        body: formData,
+      });
+      const blobResult = await uploadResponse.json() as PutBlobResult;
+      url = blobResult.url;
+    };
 
     if (!user?.id) {
       alert("Not logged in ...somehow");
@@ -134,7 +151,7 @@ export function AddRecipe() {
     createWord.mutate({
       name: data.name,
       userId: user.id,
-      imagePath: url ?? undefined,
+      imagePath: url,
       ingredients: data.ingredients,
     });
   }
