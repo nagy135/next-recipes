@@ -7,6 +7,9 @@ import { z } from "zod";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { PutBlobResult } from '@vercel/blob'
 
+import ReactCrop, { type Crop } from 'react-image-crop'
+import 'react-image-crop/dist/ReactCrop.css'
+
 import {
   Form,
   FormControl,
@@ -24,9 +27,52 @@ import { Button } from "../_components/ui/button";
 import plusIcon from "~/assets/icons/plus";
 import { Separator } from "~/components/ui/separator";
 import { ChangeEvent, useCallback, useRef, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 const ANIMATION_DELAY = 300;
+
+export function getCroppedImg(image: HTMLImageElement, crop: Crop): Promise<Blob> | undefined {
+  const canvas = document.createElement("canvas");
+  const scaleX = image.naturalWidth / image.width;
+  const scaleY = image.naturalHeight / image.height;
+  canvas.width = crop.width;
+  canvas.height = crop.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    alert('no ctx somehow');
+    return;
+  }
+
+  // New lines to be added
+  const pixelRatio = window.devicePixelRatio;
+  canvas.width = crop.width * pixelRatio;
+  canvas.height = crop.height * pixelRatio;
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  ctx.imageSmoothingQuality = "high";
+
+  ctx.drawImage(
+    image,
+    crop.x * scaleX,
+    crop.y * scaleY,
+    crop.width * scaleX,
+    crop.height * scaleY,
+    0,
+    0,
+    crop.width,
+    crop.height
+  );
+
+  // As a blob
+  return new Promise((resolve) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        resolve(blob);
+      },
+      "image/jpeg",
+      1
+    );
+  });
+}
 
 function getImageData(event: ChangeEvent<HTMLInputElement>) {
   // FileList is immutable, so we need to create a new one
@@ -64,8 +110,10 @@ export function AddRecipe() {
   const { user } = useUser();
   const { toast } = useToast();
   const imageRef = useRef<HTMLInputElement>(null);
+  const croppingImgRef = useRef<HTMLImageElement>(null);
 
   const [preview, setPreview] = useState("");
+  const [crop, setCrop] = useState<Crop>({ unit: 'px', x: 0, y: 0, width: 150, height: 100 });
 
   const [animationParent] = useAutoAnimate({ easing: "ease-in", duration: ANIMATION_DELAY, disrespectUserMotionPreference: true });
 
@@ -112,15 +160,7 @@ export function AddRecipe() {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!data.ingredients.length) {
-      toast({
-        title: "Error",
-        description: "Recipe needs at least one ingredient",
-        variant: "destructive",
-      });
-      return;
-    }
+  async function uploadThumbnail() {
     if (!imageRef.current) return;
     const thumbnail = imageRef.current.files![0];
     let url: string | undefined = undefined;
@@ -138,6 +178,17 @@ export function AddRecipe() {
       const blobResult = await uploadResponse.json() as PutBlobResult;
       url = blobResult.url;
     };
+  }
+
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (!data.ingredients.length) {
+      toast({
+        title: "Error",
+        description: "Recipe needs at least one ingredient",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (!user?.id) {
       alert("Not logged in ...somehow");
@@ -148,10 +199,33 @@ export function AddRecipe() {
       return;
     }
 
+    if (!imageRef.current) return;
+    const thumbnail = imageRef.current.files![0];
+    let uploadedUrl: string | undefined = undefined;
+    if (thumbnail && croppingImgRef.current) {
+
+      toast({
+        title: "Uploading file",
+        description: "Please wait, cropping your image...",
+      });
+      const formData = new FormData();
+      const croppedImage = await getCroppedImg(croppingImgRef.current, crop)
+      if (croppedImage) {
+        formData.append('file', croppedImage);
+
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'PUT',
+          body: formData,
+        });
+        const blobResult = await uploadResponse.json() as PutBlobResult;
+        uploadedUrl = blobResult.url;
+      }
+    }
+
     createWord.mutate({
       name: data.name,
       userId: user.id,
-      imagePath: url,
+      imagePath: uploadedUrl,
       ingredients: data.ingredients,
     });
   }
@@ -173,10 +247,9 @@ export function AddRecipe() {
             </FormItem>
           )}
         />
-        <Avatar className="w-24 h-24">
-          <AvatarImage src={preview} />
-          <AvatarFallback>BU</AvatarFallback>
-        </Avatar>
+        {preview && <ReactCrop crop={crop} aspect={3 / 2} onChange={c => setCrop(c)}>
+          <img ref={croppingImgRef} className="h-96" src={preview} />
+        </ReactCrop>}
         <FormField
           control={form.control}
           name="image"
