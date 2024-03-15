@@ -23,7 +23,7 @@ const pages: Record<string, { name?: string; icon?: JSX.Element }> = {
   "/about": { icon: questionMark },
 } as const;
 
-export default () => {
+export default function Navigation() {
   const pathname = usePathname();
   return (
     <NavigationMenu className="p-2">

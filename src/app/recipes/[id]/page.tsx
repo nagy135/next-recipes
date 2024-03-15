@@ -14,8 +14,8 @@ export default async function RecipePage({ params: { id } }: { params: { id: str
         alt={'Recipe image'} />}
       <div>{recipe.name}</div>
       <div className='container w-full my-5 md:w-2/3 text-justify'>{recipe.description}</div>
-      {recipe.usage.map((u) => (
-        <p>{u.ingredient.name} - {u.amount}</p>
+      {recipe.usage.map((u, i) => (
+        <p key={`usage-${i}`}>{u.ingredient.name} - {u.amount}</p>
       ))}
     </div>
   )

@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
-import { PutBlobResult } from '@vercel/blob'
+import { type PutBlobResult } from '@vercel/blob'
 
 import ReactCrop, { type Crop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
@@ -26,7 +26,7 @@ import { Input } from "../_components/ui/input";
 import { Button } from "../_components/ui/button";
 import plusIcon from "~/assets/icons/plus";
 import { Separator } from "~/components/ui/separator";
-import { ChangeEvent, useCallback, useRef, useState } from "react";
+import { type ChangeEvent, useCallback, useRef, useState } from "react";
 import { Textarea } from "~/components/ui/textarea";
 
 const ANIMATION_DELAY = 300;
@@ -247,12 +247,12 @@ export function AddRecipe() {
           )}
         />
         {preview && <ReactCrop crop={crop} aspect={3 / 2} onChange={c => setCrop(c)}>
-          <img ref={croppingImgRef} className="h-96" src={preview} />
+          <img ref={croppingImgRef} className="h-96" alt="crop-image" src={preview} />
         </ReactCrop>}
         <FormField
           control={form.control}
           name="image"
-          render={({ field: { onChange, value, ...rest } }) => (
+          render={({ field: { onChange, value: _value, ...rest } }) => (
             <>
               <FormItem>
                 <FormLabel>Image</FormLabel>

@@ -23,7 +23,7 @@ const Body = ({ id, title, author, description, ingredients }:
         {description.substring(0, 200)}...
       </p>
       <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
-        {ingredients.map(e => <p>{e.name} - {e.amount}</p>)}
+        {ingredients.map((e, i) => <p key={`ingredient-${i}`}>{e.name} - {e.amount}</p>)}
       </p>
       <div className="w-full flex justify-end">
         <Link href={`/recipes/${id}`}>
@@ -35,7 +35,7 @@ const Body = ({ id, title, author, description, ingredients }:
 };
 
 export function ListRecipes({ records }: ListRecipesProps) {
-  return <div className="h-screen py-20 w-full">
+  return <div className="h-screen py-20 w-full min-[430px]:w-2/3 min-[560px]:w-full">
     <LayoutGrid cards={records.map(e => ({
       id: e.recipe?.id ?? 1,
       content: <Body
