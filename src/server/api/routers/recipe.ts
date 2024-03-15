@@ -1,3 +1,4 @@
+import { and, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { groupBy } from "~/helpers/group-by";
 
@@ -71,4 +72,40 @@ export const recipeRouter = createTRPCRouter({
       ingredients: e.map((e2) => ({ ...e2.ingredient, amount: e2.amount })),
     }));
   }),
+
+  getAllWithIngredientsByKeywords: publicProcedure
+    .input(z.object({ keywords: z.string().array() }))
+    .query(async ({ ctx, input }) => {
+      const usages = await ctx.db.query.usage.findMany({
+        with: {
+          recipe: true,
+          ingredient: true,
+        },
+        where: input.keywords.length ? (usage, { or, inArray }) => or(
+          inArray(
+            usage.recipeId,
+            ctx.db
+              .select({ id: recipe.id })
+              .from(recipe)
+              .where(
+                inArray(recipe.name, input.keywords),
+              )
+          ),
+          inArray(
+            usage.ingredientId,
+            ctx.db
+              .select({ id: ingredient.id })
+              .from(ingredient)
+              .where(
+                inArray(ingredient.name, input.keywords),
+              )
+          ),
+        ) : undefined,
+        orderBy: (recipe, { desc }) => [desc(recipe.createdAt)],
+      });
+      return groupBy(usages, "recipeId").map((e) => ({
+        recipe: e[0]?.recipe,
+        ingredients: e.map((e2) => ({ ...e2.ingredient, amount: e2.amount })),
+      }));
+    }),
 });
