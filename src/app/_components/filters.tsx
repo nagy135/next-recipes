@@ -1,13 +1,11 @@
-"use client";
-
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 type FiltersProps = {
   keywords: string[];
-  setKeywords: Function;
+  setKeywords: Dispatch<SetStateAction<string[]>>;
 };
 
 export default function Filters({ keywords, setKeywords }: FiltersProps) {

@@ -4,7 +4,7 @@ import { type RecipeWithIngredients } from "~/types";
 import { LayoutGrid } from "./ui/layout-grid";
 import { Button } from "./ui/button";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Filters from "./filters";
 import { api } from "~/trpc/react";
 
